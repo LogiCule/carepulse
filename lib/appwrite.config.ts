@@ -14,7 +14,7 @@ const client = new sdk.Client()
   .setEndpoint(process.env.NEXT_PUBLIC_ENDPOINT!)
   .setProject(process.env.NEXT_PUBLIC_PROJECT_ID!)
   .setKey(process.env.NEXT_PUBLIC_API_KEY!);
-console.log({ client });
+
 export const databases = new sdk.Databases(client);
 export const storage = new sdk.Storage(client);
 export const messaging = new sdk.Messaging(client);
