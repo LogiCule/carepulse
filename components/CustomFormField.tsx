@@ -14,20 +14,23 @@ import PhoneInput from "react-phone-number-input";
 import { FormFieldType } from "./forms/PatientForm";
 import Image from "next/image";
 import { Input } from "./ui/input";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { Select, SelectContent, SelectTrigger, SelectValue } from "./ui/select";
 
 interface CustomFormFieldType {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: Control<any>;
   fieldType: FormFieldType;
   name: string;
-  placeholder: string;
+  placeholder?: string;
   label?: string;
   iconSrc?: string;
   iconAlt?: string;
   disabled?: boolean;
   dateFormat?: string;
   showTimeSelect?: boolean;
-  chilren?: React.ReactNode;
+  children?: React.ReactNode;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   renderSkeleton?: (field: any) => React.ReactNode;
 }
@@ -40,7 +43,16 @@ const RenderField = ({
   field: ControllerRenderProps<any, string>;
   Props: CustomFormFieldType;
 }) => {
-  const { placeholder, fieldType, iconSrc, iconAlt } = Props;
+  const {
+    placeholder,
+    fieldType,
+    iconSrc,
+    iconAlt,
+    dateFormat,
+    showTimeSelect,
+    renderSkeleton,
+    children,
+  } = Props;
 
   switch (fieldType) {
     case FormFieldType.INPUT:
@@ -76,6 +88,45 @@ const RenderField = ({
             className="input-phone"
             onChange={(number) => field.onChange(number)}
           />
+        </FormControl>
+      );
+    case FormFieldType.DATE_PICKER:
+      return (
+        <div className="flex rounded-md border border-dark-500">
+          <Image
+            src="/assets/icons/calendar.svg"
+            alt="calendar"
+            height={24}
+            width={24}
+            className="ml-2"
+          />
+          <FormControl>
+            <DatePicker
+              selected={field.value}
+              onChange={field.onChange}
+              dateFormat={dateFormat ?? "dd/MM/yyyy"}
+              showTimeSelect={showTimeSelect ?? false}
+              timeInputLabel="Time"
+              wrapperClassName="date-picker"
+            />
+          </FormControl>
+        </div>
+      );
+
+    case FormFieldType.SKELETON:
+      return renderSkeleton ? renderSkeleton(field) : null;
+    case FormFieldType.SELECT:
+      return (
+        <FormControl>
+          <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <SelectTrigger className="shad-select-trigger">
+              <SelectValue placeholder={placeholder} />
+            </SelectTrigger>
+
+            <SelectContent className="shad-select-content">
+              {children}
+            </SelectContent>
+          </Select>
         </FormControl>
       );
     default:
