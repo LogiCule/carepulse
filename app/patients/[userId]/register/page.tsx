@@ -4,7 +4,6 @@ import { RegisterForm } from "@/components/forms";
 import { getUser } from "@/lib/actions/patients.action";
 import { User } from "@/types";
 import Image from "next/image";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
