@@ -10,29 +10,56 @@ import SubmitButton from "../SubmitButton";
 import { useState } from "react";
 import { PatientFormValidation } from "@/lib/validation";
 import { FormFieldType } from "./PatientForm";
-import { User } from "@/types";
+import { RegisterUserParams, User } from "@/types";
 import { SelectItem } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { Doctors, GenderOptions, IdentificationTypes } from "@/constants";
+import {
+  Doctors,
+  GenderOptions,
+  IdentificationTypes,
+  PatientFormDefaultValues,
+} from "@/constants";
 import { Label } from "../ui/label";
 import Image from "next/image";
 import FileUploader from "../FileUploader";
+import { useRouter } from "next/navigation";
+import { registerPatient } from "@/lib/actions/patients.action";
 
 const RegisterForm = ({ user }: { user: User }) => {
-  console.log({ user });
+  const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof PatientFormValidation>>({
     resolver: zodResolver(PatientFormValidation),
-    defaultValues: { birthDate: new Date() },
+    defaultValues: { ...PatientFormDefaultValues, ...user },
   });
 
   async function onSubmit(values: z.infer<typeof PatientFormValidation>) {
     setIsLoading(true);
-
+    let formData;
+    if (
+      values.identificationDocument &&
+      values.identificationDocument.length > 0
+    ) {
+      const blobFile = new Blob([values.identificationDocument[0]], {
+        type: values.identificationDocument[0].type,
+      });
+      formData = new FormData();
+      formData.append("blobFile", blobFile);
+      formData.append("fileName", values.identificationDocument[0].name);
+    }
     try {
-      console.log(values);
+      const patientData: RegisterUserParams = {
+        ...values,
+        userId: user.$id,
+        birthDate: new Date(values.birthDate),
+        identificationDocument: formData,
+      };
+
+      const patient = await registerPatient(patientData);
+
+      if (patient) router.push(`/patients/${user.$id}/new-appointment`);
     } catch (error) {
       console.debug(error);
     } finally {
@@ -103,7 +130,10 @@ const RegisterForm = ({ user }: { user: User }) => {
                     {GenderOptions.map((option) => (
                       <div key={option} className="radio-group">
                         <RadioGroupItem value={option} id={option} />
-                        <Label className="cursor-pointer" htmlFor={option}>
+                        <Label
+                          className="cursor-pointer capitalize"
+                          htmlFor={option}
+                        >
                           {option}
                         </Label>
                       </div>

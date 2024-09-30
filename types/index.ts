@@ -7,7 +7,7 @@ export declare type SearchParamProps = {
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
-export declare type Gender = "Male" | "Female" | "Other";
+export declare type Gender = "male" | "female" | "other";
 export declare type Status = "pending" | "scheduled" | "cancelled";
 
 export declare interface CreateUserParams {
@@ -30,14 +30,16 @@ export declare interface RegisterUserParams extends CreateUserParams {
   primaryPhysician: string;
   insuranceProvider: string;
   insurancePolicyNumber: string;
-  allergies: string | undefined;
-  currentMedication: string | undefined;
-  familyMedicalHistory: string | undefined;
-  pastMedicalHistory: string | undefined;
-  identificationType: string | undefined;
-  identificationNumber: string | undefined;
-  identificationDocument: FormData | undefined;
+  allergies?: string;
+  currentMedication?: string;
+  familyMedicalHistory?: string;
+  pastMedicalHistory?: string;
+  identificationType?: string;
+  identificationNumber?: string;
+  identificationDocument?: FormData;
   privacyConsent: boolean;
+  treatmentConsent: boolean;
+  disclosureConsent: boolean;
 }
 
 export declare type CreateAppointmentParams = {
