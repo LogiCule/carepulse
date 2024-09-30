@@ -17,6 +17,8 @@ import { Input } from "./ui/input";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Select, SelectContent, SelectTrigger, SelectValue } from "./ui/select";
+import { Textarea } from "./ui/textarea";
+import { Checkbox } from "./ui/checkbox";
 
 interface CustomFormFieldType {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,6 +54,9 @@ const RenderField = ({
     showTimeSelect,
     renderSkeleton,
     children,
+    disabled,
+    name,
+    label,
   } = Props;
 
   switch (fieldType) {
@@ -127,6 +132,32 @@ const RenderField = ({
               {children}
             </SelectContent>
           </Select>
+        </FormControl>
+      );
+    case FormFieldType.TEXTAREA:
+      return (
+        <FormControl>
+          <Textarea
+            disabled={disabled}
+            placeholder={placeholder}
+            {...field}
+            className="shad-textArea"
+          />
+        </FormControl>
+      );
+    case FormFieldType.CHECKBOX:
+      return (
+        <FormControl>
+          <div className="flex items-center gap-4">
+            <Checkbox
+              id={name}
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+            <label htmlFor={name} className="checkbox-label">
+              {label}
+            </label>
+          </div>
         </FormControl>
       );
     default:
