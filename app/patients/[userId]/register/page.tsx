@@ -18,7 +18,7 @@ const Register = () => {
 
   return (
     <div className="flex h-screen max-h-screen">
-      <section className="remove-scrollbar container my-auto">
+      <section className="overflow-y-auto h-[calc(100vh-150px)] remove-scrollbar container my-auto">
         <div className="sub-container max-w-[496px]">
           <Image
             src="/assets/icons/logo-full.svg"
@@ -27,9 +27,7 @@ const Register = () => {
             height={1000}
             className="mb-12 h-10 w-fit"
           />
-          <div className=" overflow-y-auto h-[calc(100vh-300px)] remove-scrollbar">
-            {user && <RegisterForm user={user} />}
-          </div>
+          {user && <RegisterForm user={user} />}
           <div className="text-14-regular mt-20 flex justify-between">
             <p className="justify-items-end text-dark-600 xl:text-left">
               © 2024 CarePulse
