@@ -1,10 +1,17 @@
 import { PatientForm } from "@/components/forms";
+import PassKeyModal from "@/components/PassKeyModal";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function Home() {
+export default function Home({
+  searchParams: { admin },
+}: {
+  searchParams: { admin: string };
+}) {
+  const isAdmin = admin === "true";
   return (
     <div className="flex h-screen max-h-screen">
+      {isAdmin && <PassKeyModal />}
       <section className="remove-scrollbar container my-auto">
         <div className="sub-container max-w-[496px]">
           <Image
@@ -20,7 +27,7 @@ export default function Home() {
             <p className="justify-items-end text-dark-600 xl:text-left">
               © 2024 CarePulse
             </p>
-            <Link href="/?adim=true" className="text-green-500">
+            <Link href="/?admin=true" className="text-green-500">
               Admin
             </Link>
           </div>
