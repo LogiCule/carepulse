@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { StatCard } from "@/components/StatCard";
+import { LogoutButton } from "@/components/LogoutButton";
 import { columns } from "@/components/table/columns";
 import { DataTable } from "@/components/table/DataTable";
 import { getRecentAppointments } from "@/lib/actions/appointment.actions";
@@ -23,6 +24,7 @@ const Admin = async () => {
           />
         </Link>
         <p className="text-16-semibold">Admin Dashboard</p>
+        <LogoutButton />
       </header>
       <main className="admin-main">
         <section className="w-full space-y-4">
