@@ -55,6 +55,6 @@ export declare type CreateAppointmentParams = {
 export declare type UpdateAppointmentParams = {
   appointmentId: string;
   userId: string;
-  appointment: Appointment;
+  appointment: any;
   type: string;
 };

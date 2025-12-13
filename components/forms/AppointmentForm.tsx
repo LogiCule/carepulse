@@ -3,18 +3,25 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { toast } from "sonner";
 
 import { Form } from "@/components/ui/form";
 import CustomFormField from "../CustomFormField";
 import SubmitButton from "../SubmitButton";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SelectItem } from "../ui/select";
 import { Doctors } from "@/constants";
 import Image from "next/image";
 import { getAppointmentSchema } from "@/lib/validation";
 import { Status } from "@/types";
-import { createAppointment } from "@/lib/actions/appointment.actions";
+import {
+  createAppointment,
+  updateAppointment,
+} from "@/lib/actions/appointment.actions";
+import { Appointment } from "@/types/appwrite";
+import { formatDateTime } from "@/lib/utils";
+
 export enum FormFieldType {
   INPUT = "input",
   CHECKBOX = "checkbox",
@@ -29,25 +36,36 @@ type AppointmentFormProps = {
   type: "create" | "cancel" | "schedule";
   userId: string;
   patientId: string;
+  appointment?: Appointment;
+  setOpen?: Dispatch<SetStateAction<boolean>>;
 };
 
-const AppointmentForm = ({ type, userId, patientId }: AppointmentFormProps) => {
+const AppointmentForm = ({
+  type,
+  userId,
+  patientId,
+  appointment,
+  setOpen,
+}: AppointmentFormProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const schema = getAppointmentSchema(type);
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
-      primaryPhysician: "",
-      schedule: new Date(),
-      reason: "",
-      note: "",
-      cancellationReason: "",
+      primaryPhysician: appointment ? appointment.primaryPhysician : "",
+      schedule: appointment
+        ? new Date(appointment.schedule)
+        : new Date(Date.now()),
+      reason: appointment ? appointment.reason : "",
+      note: appointment ? appointment.note : "",
+      cancellationReason: appointment?.cancellationReason || "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof schema>) {
     setIsLoading(true);
+
     let status;
 
     switch (type) {
@@ -61,6 +79,7 @@ const AppointmentForm = ({ type, userId, patientId }: AppointmentFormProps) => {
         status = "pending";
         break;
     }
+
     try {
       if (type === "create" && patientId) {
         const appointmentData = {
@@ -68,20 +87,47 @@ const AppointmentForm = ({ type, userId, patientId }: AppointmentFormProps) => {
           patient: patientId,
           primaryPhysician: values.primaryPhysician,
           schedule: new Date(values.schedule),
-          reason: values.reason,
+          reason: values.reason!,
           note: values.note,
           status: status as Status,
         };
 
-        const appointment = await createAppointment(appointmentData);
-        if (appointment) {
+        const newAppointment = await createAppointment(appointmentData);
+        if (newAppointment) {
           form.reset();
           router.push(
-            `/patients/${userId}/new-appointment/success?appointmentId=${appointment.$id}`
+            `/patients/${userId}/new-appointment/success?appointmentId=${newAppointment.$id}`
           );
         }
+      } else {
+        const appointmentToUpdate = {
+          userId,
+          appointmentId: appointment?.$id || "",
+          appointment: {
+            primaryPhysician: values.primaryPhysician,
+            schedule: new Date(values.schedule),
+            status: status as Status,
+            cancellationReason: values.cancellationReason,
+          },
+          type,
+        };
+
+        const updated = await updateAppointment(appointmentToUpdate);
+
+        if (updated) {
+          if (setOpen) {
+            setOpen(false);
+          }
+          form.reset();
+          const message =
+            type === "schedule"
+              ? `Appointment scheduled for ${
+                  formatDateTime(values.schedule!).dateTime
+                }`
+              : `Appointment cancelled successfully`;
+          toast.success(message);
+        }
       }
-      // if (user) router.push(`/patients/${user.$id}/register`);
     } catch (error) {
       console.debug(error);
     } finally {
@@ -89,7 +135,8 @@ const AppointmentForm = ({ type, userId, patientId }: AppointmentFormProps) => {
     }
   }
 
-  let buttonLabel = "Get Started";
+  let buttonLabel;
+
   switch (type) {
     case "cancel":
       buttonLabel = "Cancel Appointment";
@@ -105,12 +152,14 @@ const AppointmentForm = ({ type, userId, patientId }: AppointmentFormProps) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 flex-1">
-        <section className="mb-12 space-y-4">
-          <h1 className="header">New Appointment</h1>
-          <p className="text-dark-700">
-            Request a new appointment in 10 seconds.
-          </p>
-        </section>
+        {type === "create" && (
+          <section className="mb-12 space-y-4">
+            <h1 className="header">New Appointment</h1>
+            <p className="text-dark-700">
+              Request a new appointment in 10 seconds.
+            </p>
+          </section>
+        )}
 
         {type !== "cancel" && (
           <>

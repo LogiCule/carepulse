@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -32,6 +33,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" forcedTheme="dark">
           {children}
           <Analytics />
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
